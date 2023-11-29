@@ -1,31 +1,20 @@
-// CTRL + C pour redémarrer le serveur
-// "scripts": {
-// "start": "npx nodemon app.js"
-//   }, pour executer de façon plus pratique nodemon
-
 const express = require('express')
-// On construit une instance d'express
 const app = express()
+const morgan = require('morgan')
 const port = 3000
 
-const mockCoworkings = require('./mock-coworking')
+let mockCoworkings = require('./mock-coworking')
 
+// Middleware qui me permet d'intepreter le corps de ma requête (req.body) en format json
+app.use(express.json())
+app.use(morgan('dev'))
 
-const logger = (req, res, next) => {
-
-    const now = new Date()
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    console.log(`${hours}h${minutes < 10 ? '0' + minutes : minutes} - ${req.url} DANS LOGGER`);
-    next()
-
-}
-
-app.use(logger)
-
+app.get('/', (req, res) => {
+    res.send('Hello World !')
+})
 
 app.get('/api/coworkings', (req, res) => {
-    res.send(`Il y a ${mockCoworkings.length} coworkings dans la liste`)
+    res.send(mockCoworkings)
 })
 
 app.get('/api/coworkings/:id', (req, res) => {
@@ -36,10 +25,55 @@ app.get('/api/coworkings/:id', (req, res) => {
 
     res.send(result)
 })
+// Créer
+app.post('/api/coworkings', function (req, res) {
+    console.log(req.body)
 
+    // Ajouter le coworking dans le tableau, en automatisant la génération d'un id
+    // let coworking = req.body
 
+    // incrémentation à partir du dernier à élément du tableau
+    const newId = mockCoworkings[mockCoworkings.length -1].id + 1
+    // let coworking = {id: newId, superficy : req.body.superficy, capacity : req.body.capacity, name: req.body.name}
+    
+    // ... SPREAD OPERATOR
+    let coworking = {id: newId, ...req.body}
+    mockCoworkings.push(coworking)
 
+    // On renvoie un objet qui contient les proriétés message et data
+    // message: `Le coworking a bien été ajouté`
+    let success = {message: `Le coworking a bien été ajouté`, data: coworking}
+    res.json(success);
 
+  });
+// Modifier
+app.put('/api/coworkings/:id', function (req, res) {
+    const coworking = mockCoworkings.find((el) => el.id === parseInt(req.params.id))
+
+    let result;
+    if (coworking) {
+        coworking.superficy = req.body.superficy
+         result = { message: `Coworking modifié`, data: coworking }
+        
+    } else {
+         result = { message: `Aucun coworking trouvé avec l'ID ${req.params.id}`}
+    }
+    res.json(result);
+});
+// Supprimer
+app.delete('/api/coworkings/:id', function (req, res) {
+    const coworking = mockCoworkings.find((el) => el.id === parseInt(req.params.id))
+
+    let result;
+    if (coworking) {
+        mockCoworkings = mockCoworkings.filter (el => el.id !== coworking.id)
+         result = { message: `Coworking supprimé`, data: coworking }
+        
+    } else {
+         result = { message: `Aucun coworking trouvé avec l'ID ${req.params.id}`}
+    }
+    res.json(result);
+  });
 
 app.listen(port, () => {
     console.log(`Le port en train d'écouter est le port : ${port}`);
