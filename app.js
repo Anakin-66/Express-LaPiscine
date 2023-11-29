@@ -10,21 +10,6 @@ const port = 3000
 
 const mockCoworkings = require('./mock-coworking')
 
-const arrUsers = [
-    {   id: 12,
-        name: "Nathan",
-        age: 24
-    },
-    {   id: 13,
-        name: "Bob",
-        age: 26
-    },
-    {   id: 14,
-        name: "Jack",
-        age: 31
-    },
-    
-]
 
 const logger = (req, res, next) => {
 
@@ -38,35 +23,6 @@ const logger = (req, res, next) => {
 
 app.use(logger)
 
-
-// Récupère le tableau en entier avec une forEach
-app.get('/names', (req, res) => {
-    let sentence = ""
-    arrUsers.forEach(obj => {
-        sentence+= obj.name + " "
-    });
-    res.send(sentence)
-})
-
-// Param d'URL
-app.get('/names/:id', (req, res) => {
-
-    let urlId = parseInt(req.params.id)
-
-    // for (let i = 0; i < arrUsers.length; i++) {
-    //     const element = arrUsers[i]
-    //     if (element.id === parseInt(req.params.id)) {
-    //         result = arrUsers[i].name
-    //         // pour arrêter la boucle
-    //         break; 
-    //     }
-    // }
-    let result = arrUsers.find(el => el.id === urlId)
-    result = result ? result.name : "not found";
-
-    res.send(result)
-
-    })
 
 app.get('/api/coworkings', (req, res) => {
     res.send(`Il y a ${mockCoworkings.length} coworkings dans la liste`)
