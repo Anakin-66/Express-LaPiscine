@@ -72,7 +72,7 @@ const coworkings = [
     {
         id: 17,
         name: "WIGI - Grands-Hommes",
-        price: { "hour": 4.8, " day": 24, "month": 240 },
+        price: { "hour": 4.8, "day": 24, "month": 240 },
         address: { "number": "26", "street": "rue Condillac", "postCode": 33000, "city": "Bordeaux" },
         picture: "",
         superficy: 200,
@@ -92,7 +92,7 @@ const coworkings = [
     {
         id: 19,
         name: "WIGI - Wilson",
-        price: { "hour": 4.8, " day": 24, "month": 240 },
+        price: { "hour": 4.8, "day": 24, "month": 240 },
         address: { "number": "71", "street": "boulevard du Président Wilson", "postCode": 33000, "city": "Bordeaux" },
         picture: "",
         superficy: 220,
