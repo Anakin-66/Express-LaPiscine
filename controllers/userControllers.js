@@ -1,4 +1,3 @@
-const { Sequelize } = require('sequelize')
 const { User } = require('../db/sequelizeSetup')
 const { UniqueConstraintError, ValidationError } = require('sequelize')
 const bcrypt = require('bcrypt')
@@ -33,6 +32,7 @@ const createUser = (req, res) => {
         .then((hash) => {
             User.create({ ...req.body, password: hash })
                 .then((user) => {
+                    user.password = ""
                     res.status(201).json({ message: `L'utilisateur a bien été crée`, data: user })
                 })
                 .catch((error) => {
@@ -41,19 +41,30 @@ const createUser = (req, res) => {
                     }
                     res.status(500).json({ message: `L'utilisateur n'a pas pu être créé`, data: error.message })
                 })
-        });
+        })
+        .catch(error => {
+            console.log(error.message)
+        })
 }
 
 const updateUser = (req, res) => {
     User.findByPk(req.params.id)
         .then((result) => {
             if (result) {
-                return result.update(req.body)
-                    .then(() => {
-                        res.status(201).json({ message: `L'utilisateur a bien été mis à jour.`, data: result })
-                    })
+                if (req.body.password) {
+                    return bcrypt.hash(req.body.password, 10)
+                        .then((hash) => {
+                            req.body.password = hash
+
+                            // req.body.username = result.username Pour empêcher que l'utilisateur mette à jour son username
+                            return result.update(req.body)
+                                .then(() => {
+                                    res.status(201).json({ message: `L'utilisateur a bien été mis à jour.`, data: result })
+                                })
+                        })
+                }
             } else {
-                res.status(404).json({ message: `Aucun utilisateur n'a été mis à jour.` })
+                res.status(404).json({ message: `Aucun utilisateur à mettre à jour n'a été trouvé.` })
             }
         })
         .catch(error => {
@@ -62,7 +73,7 @@ const updateUser = (req, res) => {
             }
             res.status(500).json({ message: 'Une erreur est survenue.', data: error.message })
         })
-};
+}
 
 const deleteUser = (req, res) => {
     User.findByPk(req.params.id)
